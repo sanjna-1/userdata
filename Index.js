@@ -1,95 +1,42 @@
-const express = require('express');
-const app = express();
-const ejs = require("ejs");
-const router = express.Router();
-const path = require("path");
-// const mongoose = require('mongoose');
-//connection start
-var MongoClient = require('mongoose');
-var url = "mongodb+srv://Sanjna:san108@cluster0.pyaf6bw.mongodb.net/?retryWrites=true&w=majority";
 
-MongoClient.connect(url,{
-    useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-var userSchema = new MongoClient.Schema({
-    name: String,
-    name: {type: String, lowercase: true, required: [true, "can't be blank"], match: [/^[a-zA-Z0-9]+$/, 'is invalid'], index: true},
- email: String,
- email: {type: String, lowercase: true, required: [true, "can't be blank"], match: [/\S+@\S+\.\S+/, 'is invalid'], index: true},
+var express = require("express");
+var app = express();
+var bodyParser = require("body-parser");
+var path = require('path')
+const User = require("./Model/model");
+const { default: mongoose } = require("mongoose");
 
-})
+var url = "mongodb+srv://sanjna:123456s@cluster0.m7htwkp.mongodb.net/?retryWrites=true&w=majority";
 
-// const userSchema = {
-//     name: String,
-//     email: String,
-//     // password: Number,
-//   };
+mongoose.connect(url);
 
-//   const User = MongoClient.model("User",userSchema);
-MongoClient.model("Contact", userSchema);
+app.set("view engine", "html");
+app.use(bodyParser.urlencoded({ extended: true }));
 
-  app.get("/contact", function(req, res){
-    res.render("contact");
+app.use(express.static('views'))
+app.use(express.static(__dirname));
+
+app.use('/index', express.static(path.join(__dirname, 'views')))
+
+app.get("/", function (req, res) {
+    res.render("home");
 });
-  
-app.post("/contact", function (req, res) {
-    console.log(req.body.email);
-  const contact = new Contact({
-    name: req.body.name,  
-    email: req.body.email,
-    //  password: req.body.password,
 
-  });
-  contact.save(function (err) {
-      if (err) {
-          throw err;
-      } else {
-        res.render("contact");
-      }
-  });
-});
-// end
+app.post("/login", async (req,res)=>{
+    const user = await User.create({
+        username: req.body.username,
+        password: req.body.password
+    })
+    console.log(user);
+   res.send("<h2>Data entered</h2>")
+})
 
-
-app.use(express.static('public'));
-
-//set view engine
-app.set("view engine","ejs");
-// app.set('views',);
-// app.use(express.static(__dirname));
-
-
-    // app.use('/',router)
-app.get('/',(req,res) => {
-    // res.render("")
-    res.sendFile(__dirname + '/views/home.html');
+// app.get("/login", function (req, res) {
+//    res.sendFile(__dirname + '/views/index.html');
  
-    // res.send(" <h1> hello world </h1> ");
-})
+//     // res.render("index.html");
+// });
 
-// app.get('/add_user', function(req, res) { 
-// //    res.sendFile(path.join(__dirname + '/connection/about.html ')); 
-// // res.render("about.html");
-// res.sendFile(__dirname + '/views/add_user.html');
-     
-// }); 
-    app.use('/', router);
-
-// app.post('/', function (req, res) {
-//    console.log("Got a POST request for the homepage");f
-//    res.send('Hello POST');
-// })
-
-// router.get('/about', function(req, res) { 
-//         res.sendFile(path.join(__dirname + '/about.html')); 
-//     }); 
-
-
-// MongoClient
-
-    
-
-app.listen(3005, (req,res)  => {
-    console.log('server started');
+app.listen(100,(req,res)=>{
+    console.log("Server Has Started!");
 })
